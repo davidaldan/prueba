@@ -1,0 +1,11 @@
+[mysqld]
+wait_timeout=20000
+max_connections=1000
+key_buffer_size         = 900M
+max_allowed_packet      = 900M
+thread_stack            = 192000K
+thread_cache_size       = 300
+innodb_buffer_pool_size = 2147483648
+query_cache_limit       = 500M
+query_cache_size        = 900M
+#resultset_cache_size = 900M

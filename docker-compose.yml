@@ -1,0 +1,64 @@
+version : '3.7'
+
+networks:
+  prueba-net :
+
+services:
+
+  prueba-api-nginx:
+    image: nginx:stable-alpine
+    container_name: prueba-api-nginx
+    ports:
+      - 8201:80
+    volumes:
+      - .:/var/www/html 
+      
+      - ./config/docker/nginx/:/etc/nginx/conf.d/ # archivo local / reflejado en archivo de la imagen
+    depends_on:
+      - prueba-api-php
+      - prueba-api-mysql
+    networks: # la red que los conecta se llama laravel
+      - prueba-net
+
+  prueba-api-mysql:
+    #platform: linux/amd64
+    #image : mysql:5.7.36
+    platform: linux/amd64
+    #image: mysql:latest
+    image : mysql:5.7.36
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    container_name: prueba-api-mysql
+    #restart: unless-stopped
+    tty : true
+    #command: --explicit_defaults_for_timestamp
+    ports :
+      - 33065:3306
+    volumes:
+      #- /c/docker/projects/prueba:/var/lib/mysql
+      - /Users/gloopingcancun/Desktop/glooping/database/prueba
+      - ./config/docker/mysql/custom.cnf:/etc/mysql/conf.d/custom.cnf # archivo local / reflejado en archivo de la imagen
+    environment :
+      MYSQL_DATABASE : ${DB_DATABASE}
+      MYSQL_USER : ${MYSQL_USER}
+      MYSQL_PASSWORD : ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD : ${DB_PASSWORD}
+      SERVICE_TAGS : prueba-dev
+      SERVICE_NAME : prueba-mysql
+    networks:
+      - prueba-net
+
+  prueba-api-php:
+    build :
+      context : .
+      dockerfile: Dockerfile
+    container_name: prueba-api-php
+    volumes:
+      - .:/var/www/html
+    ports :
+      - "9001:80"
+    networks:
+      - prueba-net
+    depends_on:
+      - prueba-api-mysql
+ 
